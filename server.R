@@ -38,6 +38,36 @@ server <- function(input, output, session) {
     data2
   })
   
+  # Intialize reactive variable to hold minutes studied today:
+  total_minutes_studied_today <- reactiveVal(0)
+
+   # Observe and update the total_minutes_studied_today based on the last record
+  observe({
+    # Get the reactive study data
+    study_data <- react_study_data()
+    
+    # Check if there is any data
+    if (nrow(study_data) > 0) {
+      # Get the last record's date
+      last_record_date <- as.Date(study_data$date[nrow(study_data)])
+      
+      # Check if the last record is for today's date
+      if (last_record_date == Sys.Date()) {
+        # If yes, set total_minutes_studied_today to the 'minutes' value for today's date
+        total_minutes_studied_today(study_data$minutes[nrow(study_data)])
+      } else {
+        # If no, set total_minutes_studied_today to 0
+        total_minutes_studied_today(0)
+      }
+    } else {
+      # If there's no data, set total_minutes_studied_today to 0
+      total_minutes_studied_today(0)
+    }
+    updateNumericInput(session, "study_duration", value = total_minutes_studied_today())
+  })
+
+  ##################### CHECK IF UPDATE NUMBERIC STUDY_DURATION WORKS OR NOT! Put a value in sqlite data base with minutes value
+
   # print(react_pushup_data)
   # print(react_situp_data)
   # print(react_study_data)
@@ -96,8 +126,7 @@ server <- function(input, output, session) {
   
 
 
-
-
+  #########################
   # Observe when the submit button is clicked
   observeEvent(input$submit_minutes, {
     # Get the value from the numeric input
@@ -105,9 +134,6 @@ server <- function(input, output, session) {
     
     # Update the stored total by adding the new minutes
     study_minutes_total(study_minutes_total() + new_minutes)
-    
-    # Update the numericInput in Box 2 with the new total minutes
-    updateNumericInput(session, "study_duration", value = study_minutes_total())
     
     # Calculate progress percentage
     progress_percent <- (study_minutes_total() / goal_minutes) * 100
