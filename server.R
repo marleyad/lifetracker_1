@@ -42,7 +42,6 @@ server <- function(input, output, session) {
   # print(react_situp_data)
   # print(react_study_data)
   
-  
   # Reactive calculation for total minutes in study table
   total_minutes <- reactive({
     sum(react_study_data()$minutes, na.rm = TRUE)
@@ -54,7 +53,11 @@ server <- function(input, output, session) {
       tail(1)
   })
   
-  
+  # Reactive Value for last minute value in study table
+  # today_total_study_minutes <- rea
+
+
+
   ### STUDY - MINUTES - BOX(Total Count) (VIEW)
   output$current_program_box <- renderValueBox({
     valueBox(
@@ -64,11 +67,6 @@ server <- function(input, output, session) {
       color = "blue"
     )
   })
-  
-  
-  
-  
-  
   
   ### STUDY - MINUTES - BOX(Total Count) (VIEW)
   output$total_minutes_box <- renderValueBox({
@@ -80,7 +78,6 @@ server <- function(input, output, session) {
     )
   })
   
-  
   ### STUDY - HOURS - BOX(Total Count) (VIEW)
   output$total_hours_box <- renderValueBox({
     valueBox(
@@ -90,22 +87,17 @@ server <- function(input, output, session) {
       color = "blue"
     )
   })
-  
-  
-  
-  
-  # Define a reactiveVal to store the study minutes *********************************
 
-  # Defd = "study_progress", value = progress_percent, striped = TRUE)
-
-  
-  
   # Define a reactiveVal to store the study minutes
   study_minutes_total <- reactiveVal(0)
   
   # Define the goal minutes
   goal_minutes <- 200  # You can adjust this value or make it dynamic if needed
   
+
+
+
+
   # Observe when the submit button is clicked
   observeEvent(input$submit_minutes, {
     # Get the value from the numeric input
@@ -133,16 +125,7 @@ server <- function(input, output, session) {
   output$total_minutes_today <- renderText({
     paste(study_minutes_total(), "minutes")
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   ### STRENGTH - PUSHUP LINE CHART
   output$study_minutes_linechart <- renderPlot({
     all_data <- react_study_data()
@@ -170,15 +153,6 @@ server <- function(input, output, session) {
         panel.grid.minor = element_blank()
       )
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   ### UPDATE FORM - STRENGTH (PUSHUPS)
   observeEvent(input$submit_pushups, {
@@ -236,7 +210,6 @@ server <- function(input, output, session) {
     current_data <- react_situp_data()
     
     ### Check if the new entry date matches the most recent record
-
     if (nrow(current_data) > 0 &&
         new_entry_situp$date == max(current_data$date)) {
 
@@ -266,15 +239,10 @@ server <- function(input, output, session) {
 
   })
   
-  
-  
-  
-  
   # Reactive calculation for total pushups
   total_pushups <- reactive({
     sum(react_pushup_data()$pushups, na.rm = TRUE)
   })
-  
   
   # Reactive calculation for total pushups for day
   total_pushups_today <- reactive({

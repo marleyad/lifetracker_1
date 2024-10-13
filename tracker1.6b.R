@@ -51,8 +51,7 @@ ui <- dashboardPage(
   dashboardBody(
     tabItems(
       
-      ### TAB FOR VIEW DATA
-  
+      ### TAB FOR VIEW STUDY DATA
       tabItem(
         tabName = "view_data",
         fluidRow(
@@ -71,7 +70,6 @@ ui <- dashboardPage(
       ),
       
       ### TAB FOR STUDY DATA ENTRY
-      
       tabItem(
         tabName = "study_entry",
         
