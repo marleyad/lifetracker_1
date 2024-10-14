@@ -74,22 +74,22 @@ ui <- dashboardPage(
         tabName = "study_entry",
         
         # Custom CSS to change progress bar height
-        tags$style(HTML("
-          .progress {
-          height: 40px;  /* Adjust height here */
-          }
-        ")),
+        # tags$style(HTML("
+        #   .progress {
+        #   height: 40px;  /* Adjust height here */
+        #   }
+        # ")),
         
         # Progress bar at the top (full width, green, no stripes, starts at 0%)
-        div(
-          style = "width: 100%;",  
-          shinyWidgets::progressBar(
-            id = "study_progress", 
-            value = 0, 
-            status = "success",  # Green color
-            display_pct = FALSE
-          )
-        ),
+        # div(
+        #   style = "width: 100%;",  
+        #   shinyWidgets::progressBar(
+        #     id = "study_progress", 
+        #     value = 0, 
+        #     status = "success",  # Green color
+        #     display_pct = FALSE
+        #   )
+        # ),
       
         # Two side-by-side boxes (width 6 each)
         fluidRow(
@@ -114,17 +114,11 @@ ui <- dashboardPage(
               )
             )
           ),
-          
-          # Box 2 (on the right)
           box(
-            width = 6,
-            title = "Box 2: Study Details",
-            height = "300px",  # Set height for box 2 to match box 1
-            
-            # Date input, numeric input for minutes, and text area for notes
-            dateInput(inputId = "study_date", label = "Select Date", value = Sys.Date()),
-            numericInput(inputId = "study_duration", label = "Study Duration (minutes)", value = 0, min = 0),
-            textAreaInput(inputId = "study_notes", label = "Notes", placeholder = "Enter any study notes here", width = "100%")
+            title = "Box 2", width = 6,
+            dateInput("study_date", "Date:", value = Sys.Date()),
+            uiOutput("dynamic_study_duration"),
+            textInput("study_notes", "Notes:")
           )
         )
       ),

@@ -38,10 +38,10 @@ server <- function(input, output, session) {
     data2
   })
   
-  # Intialize reactive variable to hold minutes studied today:
+  # Intialize reactive variable to hold minutes studied today: ******************************* BEST
   total_minutes_studied_today <- reactiveVal(0)
 
-   # Observe and update the total_minutes_studied_today based on the last record
+   # Observe and update the total_minutes_studied_today based on the last record *************** BEST!!!
   observe({
     # Get the reactive study data
     study_data <- react_study_data()
@@ -63,10 +63,7 @@ server <- function(input, output, session) {
       # If there's no data, set total_minutes_studied_today to 0
       total_minutes_studied_today(0)
     }
-    updateNumericInput(session, "study_duration", value = total_minutes_studied_today())
   })
-
-  ##################### CHECK IF UPDATE NUMBERIC STUDY_DURATION WORKS OR NOT! Put a value in sqlite data base with minutes value
 
   # print(react_pushup_data)
   # print(react_situp_data)
@@ -83,11 +80,6 @@ server <- function(input, output, session) {
       tail(1)
   })
   
-  # Reactive Value for last minute value in study table
-  # today_total_study_minutes <- rea
-
-
-
   ### STUDY - MINUTES - BOX(Total Count) (VIEW)
   output$current_program_box <- renderValueBox({
     valueBox(
@@ -118,39 +110,53 @@ server <- function(input, output, session) {
     )
   })
 
-  # Define a reactiveVal to store the study minutes
-  study_minutes_total <- reactiveVal(0)
-  
-  # Define the goal minutes
-  goal_minutes <- 200  # You can adjust this value or make it dynamic if needed
+
+
+
+# Define the goal minutes
+goal_minutes <- 200  # You can adjust this value or make it dynamic if needed
+
+
+# Observe when the submit button is clicked
+observeEvent(input$submit_minutes, {
+
+  # Get the value from the numeric input
+  new_minutes <- input$study_minutes
+
+  # update total_minutes_studied today with input
+  total_minutes_studied_today(total_minutes_studied_today() + new_minutes)
+})
+
+# Render total minutes for today in Box 1
+output$total_minutes_today <- renderText({
+  paste(total_minutes_studied_today(), "minutes")
+})
+
+
   
 
 
-  #########################
-  # Observe when the submit button is clicked
-  observeEvent(input$submit_minutes, {
-    # Get the value from the numeric input
-    new_minutes <- input$study_minutes
-    
-    # Update the stored total by adding the new minutes
-    study_minutes_total(study_minutes_total() + new_minutes)
-    
-    # Calculate progress percentage
-    progress_percent <- (study_minutes_total() / goal_minutes) * 100
-    progress_percent <- min(progress_percent, 100)  # Ensure it doesn't exceed 100%
-    
-    # Dynamically update the progress bar
-    shinyWidgets::updateProgressBar(
-      session = session, 
-      id = "study_progress", 
-      value = progress_percent
-    )
-  })
-  
-  # Render total minutes for today in Box 1
-  output$total_minutes_today <- renderText({
-    paste(study_minutes_total(), "minutes")
-  })
+
+
+
+output$dynamic_study_duration <- renderUI({
+  numericInput("study_duration", "Study Duration (minutes):", 
+               value = total_minutes_studied_today(), 
+               min = 0)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   ### STRENGTH - PUSHUP LINE CHART
   output$study_minutes_linechart <- renderPlot({
@@ -285,23 +291,13 @@ server <- function(input, output, session) {
       return(sum(today_data$pushups, na.rm = TRUE))
     }
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   # Reactive calculation for total situps
   total_situps <- reactive({
     sum(react_situp_data()$situps, na.rm = TRUE)
   })
   
-  
-  # Reactive calculation for total pushups for day ******************************
+  # Reactive calculation for total pushups for day 
   total_situps_today <- reactive({
     # Get today's date
     today_date <- as_date(Sys.Date())
