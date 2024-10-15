@@ -38,10 +38,10 @@ server <- function(input, output, session) {
     data2
   })
   
-  # Intialize reactive variable to hold minutes studied today: ******************************* BEST
+  # Intialize reactive variable to hold minutes studied today:
   total_minutes_studied_today <- reactiveVal(0)
 
-   # Observe and update the total_minutes_studied_today based on the last record *************** BEST!!!
+   # Observe and update the total_minutes_studied_today based on the last record
   observe({
     # Get the reactive study data
     study_data <- react_study_data()
@@ -145,26 +145,149 @@ server <- function(input, output, session) {
     }
   })
 
-  # Observe when the submit button is clicked
+
+
+
+
+
+
+  ### Submit Minutes when clicked
   observeEvent(input$submit_minutes, {
-
+  
     # Get the value from the numeric input
-    new_minutes <- input$study_minutes
-
-    # update total_minutes_studied today with input
+    new_minutes <- as.numeric(input$study_minutes)
+    
+    ### Create a new entry for today's study session
+    new_entry_study <- data.frame(
+      date = Sys.Date(),  # Use today's date
+      minutes = new_minutes  # Minutes entered by the user
+    )
+    
+    ### Get current study data from the reactive data
+    current_data <- react_study_data()
+    
+    ### Check if there is an entry for today
+    if (nrow(current_data) > 0 && new_entry_study$date == max(current_data$date)) {
+      
+      # Update the minutes for today's date
+      current_data$minutes[which.max(current_data$date)] <- 
+        current_data$minutes[which.max(current_data$date)] + new_entry_study$minutes
+      
+      # Update the record directly in the SQLite database
+      dbExecute(con_str, 
+                "UPDATE study SET minutes = ? WHERE date = ?", 
+                params = list(current_data$minutes[which.max(current_data$date)], 
+                              new_entry_study$date))
+      
+    } else {
+      ### Insert a new record if today's entry does not exist
+      dbExecute(con_str, 
+                "INSERT INTO study (date, minutes) VALUES (?, ?)", 
+                params = list(new_entry_study$date, new_entry_study$minutes))
+    }
+    
+    ### Read the updated data from the database
+    updated_study_data <- dbReadTable(con_str, "study")
+    
+    ### Update the reactive study data with the new data
+    react_study_data(updated_study_data)
+    
+    ### Update the total minutes studied today
     total_minutes_studied_today(total_minutes_studied_today() + new_minutes)
-
-    # Calculate the progress percentage
+    
+    ### Calculate the progress percentage
     progress_percent <- (total_minutes_studied_today() / day_goal()) * 100
     progress_percent <- min(progress_percent, 100)  # Ensure it doesn't exceed 100%
-
-    # Dynamically update the progress bar
+    
+    ### Dynamically update the progress bar
     shinyWidgets::updateProgressBar(
       session = session, 
       id = "study_progress", 
       value = progress_percent
-      )
+    )
   })
+
+
+
+
+observeEvent(input$submit_full_entry, {
+  # Create new entry for study data
+  new_study_entry <- data.frame(
+    date = as.Date(input$study_date),
+    minutes = total_minutes_studied_today(),  # assuming you're using this as the minutes studied for the day
+    notes = input$study_notes,
+    anki_cards = input$anki_card_number,
+    github_updated = as.logical(input$github_check),
+    linkedin_updated = as.logical(input$linkedin_check),
+    program = input$program_input,
+    status = input$status_input
+  )
+  
+  # Get current reactive study data
+  current_data <- react_study_data()
+  
+  # Check if there's an entry for today's date in the current data
+  if (nrow(current_data) > 0 && new_study_entry$date == max(current_data$date)) {
+    # Update the most recent record
+    current_data$minutes[which.max(current_data$date)] <- new_study_entry$minutes
+    current_data$notes[which.max(current_data$date)] <- new_study_entry$notes
+    current_data$anki_cards[which.max(current_data$date)] <- new_study_entry$anki_cards
+    current_data$github_updated[which.max(current_data$date)] <- new_study_entry$github_updated
+    current_data$linkedin_updated[which.max(current_data$date)] <- new_study_entry$linkedin_updated
+    current_data$program[which.max(current_data$date)] <- new_study_entry$program
+    current_data$status[which.max(current_data$date)] <- new_study_entry$status
+
+    # Update the record directly in the database
+    dbExecute(con_str, 
+              "UPDATE study SET 
+                 minutes = ?, notes = ?, anki = ?, github = ?, linkedin = ?, 
+                 program = ?, status = ? 
+               WHERE date = ?", 
+              params = list(new_study_entry$minutes, new_study_entry$notes, new_study_entry$anki_cards, 
+                            new_study_entry$github_updated, new_study_entry$linkedin_updated, 
+                            new_study_entry$program, new_study_entry$status, new_study_entry$date))
+  } else {
+    # Insert the new entry into the database
+    dbExecute(con_str, 
+              "INSERT INTO study 
+               (date, minutes, notes, anki, github, linkedin, program, status) 
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+              params = list(new_study_entry$date, new_study_entry$minutes, new_study_entry$notes, 
+                            new_study_entry$anki_cards, new_study_entry$github_updated, 
+                            new_study_entry$linkedin_updated, new_study_entry$program, new_study_entry$status))
+  }
+
+  # Read the updated study data from the database
+  updated_study_data <- dbReadTable(con_str, "study")
+  
+  # Update the reactive variable with the new data
+  react_study_data(updated_study_data)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   # Show Hours of Day Goal
   output$day_goal_display <- renderText({

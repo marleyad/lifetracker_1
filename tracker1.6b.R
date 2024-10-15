@@ -118,9 +118,36 @@ ui <- dashboardPage(
           ),
           box(
             title = "Box 2", width = 6,
+            
+            # Date input
             dateInput("study_date", "Date:", value = Sys.Date()),
+            
+            # Dynamic study duration input
             uiOutput("dynamic_study_duration"),
-            textInput("study_notes", "Notes:")
+            
+            # Text input for study notes
+            textInput("study_notes", "Notes:"),
+            
+            # Numeric input for Anki card numbers
+            numericInput("anki_card_number", "Anki Card Number:", value = 0, min = 0),
+            
+            # Checkbox input for GitHub check
+            checkboxInput("github_check", "Update Github", value = FALSE),
+            
+            # Checkbox input for LinkedIn check
+            checkboxInput("linkedin_check", "Post on LinkedIn", value = FALSE),
+            
+            # Dropdown list input for program with option to add new values
+            selectizeInput("program_input", "Program:", 
+                          choices = c("Masters Program"), 
+                          options = list(create = TRUE)),
+            
+            # Dropdown list input for status with option to add new values
+            selectizeInput("status_input", "Status:", 
+                          choices = c("student"), 
+                          options = list(create = TRUE)),
+            # Submit button for Box 2
+            actionButton(inputId = "submit_full_entry", label = "Submit Full Entry")
           )
         )
       ),
