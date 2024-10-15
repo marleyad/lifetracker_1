@@ -110,52 +110,45 @@ server <- function(input, output, session) {
     )
   })
 
+  # Creating a goal for minutes each day
+  day_goal <- reactiveVal(240)
+
+
+ observeEvent(input$submit_goal, {
+  new_goal <- input$enter_goal
+  if (new_goal >= 0) {  # Basic validation
+    day_goal(new_goal*60)
+  }
+  })
 
 
 
-# Define the goal minutes
-goal_minutes <- 200  # You can adjust this value or make it dynamic if needed
-
-
-# Observe when the submit button is clicked
-observeEvent(input$submit_minutes, {
+  # Observe when the submit button is clicked
+  observeEvent(input$submit_minutes, {
 
   # Get the value from the numeric input
   new_minutes <- input$study_minutes
 
   # update total_minutes_studied today with input
   total_minutes_studied_today(total_minutes_studied_today() + new_minutes)
-})
+  })
 
-# Render total minutes for today in Box 1
-output$total_minutes_today <- renderText({
-  paste(total_minutes_studied_today(), "minutes")
-})
-
-
-  
-
-
+  # Render total minutes for today in Box 1
+  # output$total_minutes_today <- renderText({
+  # paste(total_minutes_studied_today(), "minutes")
+  # })
+  output$day_goal_display <- renderText({
+  paste(day_goal()/60, "hours")
+  })
 
 
 
-output$dynamic_study_duration <- renderUI({
-  numericInput("study_duration", "Study Duration (minutes):", 
-               value = total_minutes_studied_today(), 
-               min = 0)
-})
-
-
-
-
-
-
-
-
-
-
-
-
+  # Dynamically update value for numeric input
+  output$dynamic_study_duration <- renderUI({
+    numericInput("study_duration", "Study Duration (minutes):", 
+                value = total_minutes_studied_today(), 
+                min = 0)
+  })
 
 
   ### STRENGTH - PUSHUP LINE CHART
@@ -312,19 +305,6 @@ output$dynamic_study_duration <- renderUI({
       return(sum(today_data$situps, na.rm = TRUE))
     }
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   ### STRENGTH - PUSHUPS - BOX(Total Count) (VIEW)
   output$total_pushup_box_view <- renderValueBox({

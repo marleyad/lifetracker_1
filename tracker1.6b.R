@@ -104,13 +104,15 @@ ui <- dashboardPage(
             fluidRow(
               column(6,
                      numericInput(inputId = "study_minutes", label = "Enter minutes studied", value = 0, min = 0),
-                     actionButton(inputId = "submit_minutes", label = "Submit")
+                     actionButton(inputId = "submit_minutes", label = "Submit"),
+                     numericInput(inputId = "enter_goal", label = "Enter Hours Goal for today", value = 4, min = 0),
+                     actionButton(inputId = "submit_goal", label = "Submit")
               ),
               
               # Part 2: Total minutes today (moved to the right side)
               column(6,
-                     h4("Total Minutes Today:"),
-                     textOutput("total_minutes_today", inline = TRUE)
+                     h4("Goal for Today:"),
+                     textOutput("day_goal_display", inline = TRUE)
               )
             )
           ),
