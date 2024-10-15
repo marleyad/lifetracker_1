@@ -65,6 +65,23 @@ server <- function(input, output, session) {
     }
   })
 
+  # Creating a goal for minutes each day
+  day_goal <- reactiveVal(240)
+
+  observe({
+    # Calculate progress percentage
+    progress_percent <- (total_minutes_studied_today() / day_goal()) * 100
+    progress_percent <- min(progress_percent, 100)  # Ensure it doesn't exceed 100%
+
+    # Dynamically update the progress bar on page load
+    shinyWidgets::updateProgressBar(
+      session = session, 
+      id = "study_progress", 
+      value = progress_percent
+    )
+  })
+
+
   # print(react_pushup_data)
   # print(react_situp_data)
   # print(react_study_data)
@@ -110,38 +127,49 @@ server <- function(input, output, session) {
     )
   })
 
-  # Creating a goal for minutes each day
-  day_goal <- reactiveVal(240)
+  observeEvent(input$submit_goal, {
+    new_goal <- input$enter_goal
+    if (new_goal >= 0) {  # Basic validation
+      day_goal(new_goal*60)
 
-
- observeEvent(input$submit_goal, {
-  new_goal <- input$enter_goal
-  if (new_goal >= 0) {  # Basic validation
-    day_goal(new_goal*60)
-  }
+      # After updating the goal, recalculate the progress percentage
+      progress_percent <- (total_minutes_studied_today() / day_goal()) * 100
+      progress_percent <- min(progress_percent, 100)  # Ensure it doesn't exceed 100%
+      
+      # Dynamically update the progress bar
+      shinyWidgets::updateProgressBar(
+        session = session, 
+        id = "study_progress", 
+        value = progress_percent
+      )
+    }
   })
-
-
 
   # Observe when the submit button is clicked
   observeEvent(input$submit_minutes, {
 
-  # Get the value from the numeric input
-  new_minutes <- input$study_minutes
+    # Get the value from the numeric input
+    new_minutes <- input$study_minutes
 
-  # update total_minutes_studied today with input
-  total_minutes_studied_today(total_minutes_studied_today() + new_minutes)
+    # update total_minutes_studied today with input
+    total_minutes_studied_today(total_minutes_studied_today() + new_minutes)
+
+    # Calculate the progress percentage
+    progress_percent <- (total_minutes_studied_today() / day_goal()) * 100
+    progress_percent <- min(progress_percent, 100)  # Ensure it doesn't exceed 100%
+
+    # Dynamically update the progress bar
+    shinyWidgets::updateProgressBar(
+      session = session, 
+      id = "study_progress", 
+      value = progress_percent
+      )
   })
 
-  # Render total minutes for today in Box 1
-  # output$total_minutes_today <- renderText({
-  # paste(total_minutes_studied_today(), "minutes")
-  # })
+  # Show Hours of Day Goal
   output$day_goal_display <- renderText({
-  paste(day_goal()/60, "hours")
+      paste(day_goal()/60, "hours")
   })
-
-
 
   # Dynamically update value for numeric input
   output$dynamic_study_duration <- renderUI({
@@ -149,7 +177,6 @@ server <- function(input, output, session) {
                 value = total_minutes_studied_today(), 
                 min = 0)
   })
-
 
   ### STRENGTH - PUSHUP LINE CHART
   output$study_minutes_linechart <- renderPlot({
@@ -336,7 +363,7 @@ server <- function(input, output, session) {
     )
   })
   
-  ## STRENGTH SITUPS - BOX(Today Count) (ENTRY) ***************
+  ## STRENGTH SITUPS - BOX(Today Count) (ENTRY)
   output$today_situp_box <- renderValueBox({
     valueBox(
       value = formatC(total_situps_today(), format = "f", big.mark = ",", digits = 0),
@@ -345,18 +372,6 @@ server <- function(input, output, session) {
       color = "blue"
     )
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   
   ### STRENGTH - PUSHUP LINE CHART

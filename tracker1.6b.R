@@ -74,22 +74,22 @@ ui <- dashboardPage(
         tabName = "study_entry",
         
         # Custom CSS to change progress bar height
-        # tags$style(HTML("
-        #   .progress {
-        #   height: 40px;  /* Adjust height here */
-        #   }
-        # ")),
+        tags$style(HTML("
+          .progress {
+          height: 40px;  /* Adjust height here */
+          }
+        ")),
         
         # Progress bar at the top (full width, green, no stripes, starts at 0%)
-        # div(
-        #   style = "width: 100%;",  
-        #   shinyWidgets::progressBar(
-        #     id = "study_progress", 
-        #     value = 0, 
-        #     status = "success",  # Green color
-        #     display_pct = FALSE
-        #   )
-        # ),
+        div(
+          style = "width: 100%;",  
+          shinyWidgets::progressBar(
+            id = "study_progress", 
+            value = 0, 
+            status = "success",  # Green color
+            display_pct = FALSE
+          )
+        ),
       
         # Two side-by-side boxes (width 6 each)
         fluidRow(
